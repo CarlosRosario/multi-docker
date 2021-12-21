@@ -1,0 +1,21 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t crosario1990/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true crosario1990/react-test npm run test
+
+after_success:
+  - docker build -t crosario1990/multi-client ./client
+  - docker build -t crosario1990/multi-nginx  ./nginx
+  - docker build -t crosario1990/multi-server ./server
+  - docker build -t crosario1990/multi-worker ./worker
+  - docker login --username "$DOCKER_ID" --password "$DOCKER_PASSWORD"
+  - docker push crosario1990/multi-client
+  - docker push crosario1990/multi-nginx
+  - docker push crosario1990/multi-server
+  - docker push crosario1990/multi-worker
